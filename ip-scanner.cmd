@@ -2,7 +2,7 @@
 title IP Scanner
 setlocal EnableDelayedExpansion
 
-set "ip_first_3=172.17.114"
+set "ip_first_3=XXX.XXX.XXX" :: HAS TO BE SET BY HAND!
 set "max_ping_time=5000"
 set "max_concurrent=20"
 set "total_ips=255"
