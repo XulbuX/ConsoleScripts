@@ -67,7 +67,7 @@ for %%s in ("%KMS:|=" "%") do (
         type "%TEMP%\~activation.tmp"
         find /i "successfully" "%TEMP%\~activation.tmp" >nul && (
             echo.
-            echo %SEP_LINE1%
+            call :echoTitle "Done" "#"
             echo Successfully activated Windows!
             echo %SEP_LINE1%
             goto :EOF
