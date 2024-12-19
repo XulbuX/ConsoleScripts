@@ -27,40 +27,31 @@ for /f "tokens=2 delims==" %%a in ('wmic os get caption /value') do (
     )
 )
 
-:: GET CONSOLE WIDTH
+:: GENERATE SEPARATOR LINE
 for /F "usebackq tokens=2* delims=: " %%w in (`mode con ^| findstr Columns`) do set CONSOLE_WIDTH=%%w
-
-:: GET STRING LENGTH
->%TEMP%\~stringlength.tmp echo %TITLE%
-for %%l in (%TEMP%\~stringlength.tmp) do set /A STR_LEN = %%~zl - 2
-del %TEMP%\~stringlength.tmp
-
-:: GENERATE SEPARATOR LINES
-set /A num_chars=(%CONSOLE_WIDTH% - (%STR_LEN% + 2)) / 2
-set "SEP_LINE1="
-set "SEP_LINE2="
-set "SEP_LINE_TITLE="
-for /L %%i in (1,1,%CONSOLE_WIDTH%) do set "SEP_LINE1=!SEP_LINE1!#"
-for /L %%i in (1,1,%CONSOLE_WIDTH%) do set "SEP_LINE2=!SEP_LINE2!-"
-for /L %%i in (1,1,%num_chars%) do set "SEP_LINE_TITLE=!SEP_LINE_TITLE!#"
+set "SEP_LINE="
+for /L %%i in (1,1,%CONSOLE_WIDTH%) do set "SEP_LINE=!SEP_LINE!#"
 
 echo.
 call :echoTitle "%TITLE%" "#"
 echo Microsoft Windows %VERSION% %EDITION%
-echo %SEP_LINE1%
+echo %SEP_LINE%
 echo.
 
 :: ACTIVATION
+set "EDITION=%EDITION: N=%"
 set "keys=!KEYS[%EDITION%]!"
 for %%s in ("%KMS:|=" "%") do (
     for %%k in ("%keys:|=" "%") do (
         call :echoTitle "Install KMS client key %%k" "-"
-        cscript //nologo %WINDIR%\system32\slmgr.vbs /ipk %%~k >nul 2>&1 || (
-            echo Failed to install KMS client key.
+        cscript //nologo %WINDIR%\system32\slmgr.vbs /ipk %%~k > "%TEMP%\~installkey.tmp" 2>&1 || (
+            type "%TEMP%\~installkey.tmp"
+            echo Failed to install KMS client key^^! Error details above.
         )
         call :echoTitle "Set KMS machine address %%s" "-"
-        cscript //nologo %WINDIR%\system32\slmgr.vbs /skms %%~s >nul 2>&1 || (
-            echo Failed to set KMS machine address: Server might be unavailable.
+        cscript //nologo %WINDIR%\system32\slmgr.vbs /skms %%~s > "%TEMP%\~setaddress.tmp" 2>&1 || (
+            type "%TEMP%\~setaddress.tmp"
+            echo Failed to set KMS machine address^^! Error details above.
         )
         call :echoTitle "Activate Windows" "-"
         cscript //nologo %WINDIR%\system32\slmgr.vbs /ato > "%TEMP%\~activation.tmp" 2>&1
@@ -68,18 +59,18 @@ for %%s in ("%KMS:|=" "%") do (
         find /i "successfully" "%TEMP%\~activation.tmp" >nul && (
             echo.
             call :echoTitle "Done" "#"
-            echo Successfully activated Windows!
-            echo %SEP_LINE1%
+            echo Successfully activated Windows^^!
+            echo %SEP_LINE%
             goto :EOF
         ) || (
-            echo Activation failed! Error details above.
+            echo Activation failed^^! Error details above.
         )
         echo.
     )
 )
 
 echo.
-echo All activation attempts failed!
+echo All activation attempts failed^^!
 echo Please check your internet connection or try again later.
 goto :EOF
 
@@ -95,10 +86,10 @@ for %%l in (%TEMP%\~stringlength.tmp) do set /A STR_LEN = %%~zl - 2
 del %TEMP%\~stringlength.tmp
 :: GENERATE SEPARATOR LINES
 set /A num_chars=(%CONSOLE_WIDTH% - (%STR_LEN% + 2)) / 2
-set "SEP_LINE="
-for /L %%i in (1,1,%num_chars%) do set "SEP_LINE=!SEP_LINE!%~2"
+set "SEP="
+for /L %%i in (1,1,%num_chars%) do set "SEP=!SEP!%~2"
 :: OUTPUT
-echo %SEP_LINE% %~1 %SEP_LINE%
+echo %SEP% %~1 %SEP%
 goto :EOF
 
 
