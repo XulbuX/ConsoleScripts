@@ -1,3 +1,3 @@
 # ConsoleScripts
 
-All of my different Windows Batch files.
+All of my different Bash, Batch and PowerShell scripts.
