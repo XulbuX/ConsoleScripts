@@ -2,7 +2,7 @@
 
 All of my different Bash, Batch and PowerShell scripts.
 
-## vm_startup.ps1
+## win11_vm_startup.ps1
 
 This script is supposed to be run after a fresh start of a Windows virtual machine.
 
@@ -16,5 +16,5 @@ The script will configure the following:
 
 Run the script with the following command in a PowerShell console (*open in the directory where the script is located*):
 ```powershell
-powershell -ExecutionPolicy Bypass -File "./vm_startup.ps1"
+powershell -ExecutionPolicy Bypass -File "./win11_vm_startup.ps1"
 ```
