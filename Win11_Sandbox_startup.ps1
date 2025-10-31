@@ -44,7 +44,7 @@ try {
     Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope LocalMachine -ErrorAction Stop | Out-Null
     Write-Host "  -> Execution policy set to Unrestricted." -ForegroundColor Green
 } catch {
-    Write-Host "  -> WARNING: Could not set execution policy. $($_.Exception.Message)" -ForegroundColor Yellow
+    Write-Host "  -> [WARNING] Could not set execution policy. $($_.Exception.Message)" -ForegroundColor Yellow
 }
 
 # DETECT SYSTEM ARCHITECTURE ONCE FOR THE ENTIRE SCRIPT
@@ -354,7 +354,7 @@ try {
         $extendedInfo = $allExtendedUpdates | Where-Object { $_.ID -eq $lookupId } | Select-Object -First 1
         
         if (-not $extendedInfo) {
-            Write-Host "     WARNING: Could not find matching ExtendedInfo for downloadable update ID $lookupId. Skipping." -ForegroundColor Yellow
+            Write-Host "     [WARNING] Could not find matching ExtendedInfo for downloadable update ID $lookupId. Skipping." -ForegroundColor Yellow
             continue
         }
         
@@ -362,7 +362,7 @@ try {
         $fileNode = $extendedInfo.Xml.Files.File | Where-Object { $_.FileName -and $_.FileName -notlike "Abm_*" } | Select-Object -First 1
 
         if (-not $fileNode) {
-            Write-Host "     WARNING: Found matching ExtendedInfo for ID $lookupId, but it contains no valid file node. Skipping." -ForegroundColor Yellow
+            Write-Host "     [WARNING] Found matching ExtendedInfo for ID $lookupId, but it contains no valid file node. Skipping." -ForegroundColor Yellow
             continue
         }
 
@@ -430,7 +430,7 @@ try {
             $packagesToDownload += $latestStorePackage
             Write-Host "  -> Found latest Store package: $($latestStorePackage.FullName)" -ForegroundColor Green
         } else {
-            Write-Host "  -> WARNING: Could not find any Microsoft.WindowsStore package." -ForegroundColor Yellow
+            Write-Host "  -> [WARNING] Could not find any Microsoft.WindowsStore package." -ForegroundColor Yellow
         }
 
         $packagesToDownload += $filteredDependencies
@@ -455,7 +455,7 @@ try {
             $downloadUrl = ($fileLocations | Where-Object { $_.Url -like "*$baseFileName*" }).Url
 
             if (-not $downloadUrl) {
-                Write-Host "     WARNING: Could not retrieve download URL. Skipping." -ForegroundColor Yellow
+                Write-Host "     [WARNING] Could not retrieve download URL. Skipping." -ForegroundColor Yellow
                 continue
             }
             if ($noDownload) {
@@ -472,14 +472,14 @@ try {
                 Invoke-WebRequest -Uri $downloadUrl -OutFile $filePath -UseBasicParsing
                 Write-Host "     Download complete." -ForegroundColor Green
             } catch {
-                Write-Host "     ERROR: Failed to download. $($_.Exception.Message)" -ForegroundColor Red
+                Write-Host "     [ERROR] Failed to download. $($_.Exception.Message)" -ForegroundColor Red
             }
         }
 
         Write-Host "`nFinished downloading packages to: $workingDir" -ForegroundColor Green
 
     } catch {
-        Write-Host "ERROR: An error occurred during the filtering or downloading phase:" -ForegroundColor Red
+        Write-Host "[ERROR] An error occurred during the filtering or downloading phase:" -ForegroundColor Red
         Write-Host "  $($_.Exception.Message)" -ForegroundColor Red
     }
 
@@ -526,7 +526,7 @@ try {
                     Add-AppxPackage -Path $package.FullName
                     Write-Host "     Success." -ForegroundColor Green
                 } catch {
-                    Write-Host "     ERROR: Failed to install. $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host "     [ERROR] Failed to install. $($_.Exception.Message)" -ForegroundColor Red
                 }
             }
         }
@@ -539,7 +539,7 @@ try {
                 Add-AppxPackage -Path $storePackageFile.FullName
                 Write-Host "     Success: Microsoft Store has been installed/updated." -ForegroundColor Green
             } catch {
-                Write-Host "     ERROR: Failed to install. $($_.Exception.Message)" -ForegroundColor Red
+                Write-Host "     [ERROR] Failed to install. $($_.Exception.Message)" -ForegroundColor Red
             }
         } else {
             Write-Host "  -> Microsoft Store package was not found in the download folder." -ForegroundColor Yellow
@@ -548,7 +548,7 @@ try {
         Write-Host "`nInstallation process finished." -ForegroundColor Green
 
     } catch {
-        Write-Host "ERROR: A critical error occurred during the installation phase: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "[ERROR] A critical error occurred during the installation phase: $($_.Exception.Message)" -ForegroundColor Red
     }
     
     ######################### SET REGION TO US SO THE STORE WILL WORK - DEFAULT 'World' REGION DOES NOT WORK #########################
@@ -568,11 +568,11 @@ try {
         Write-Host "     Registry configuration complete." -ForegroundColor Green
     }
     catch {
-        Write-Host "     ERROR: Failed to configure registry settings. $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "     [ERROR] Failed to configure registry settings. $($_.Exception.Message)" -ForegroundColor Red
     }
 
 } catch {
-    Write-Host "`nERROR: An error occurred during Microsoft Store installation:" -ForegroundColor Red
+    Write-Host "`n[ERROR] An error occurred during Microsoft Store installation:" -ForegroundColor Red
     if ($_.Exception.Response) {
         $statusCode = $_.Exception.Response.StatusCode.value__
         $statusDescription = $_.Exception.Response.StatusDescription
@@ -614,11 +614,11 @@ function Get-LatestRelease {
         $releasesUrl = "https://api.github.com/repos/$repoOwner/$repoName/releases"
         $releases = Invoke-RestMethod -Uri $releasesUrl -UseBasicParsing
     } catch {
-        Write-Host "ERROR: Failed to fetch releases from GitHub API: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "[ERROR] Failed to fetch releases from GitHub API: $($_.Exception.Message)" -ForegroundColor Red
         return $null
     }
 	if (-not $releases) { 
-        Write-Host "ERROR: No releases found for $repoOwner/$repoName." -ForegroundColor Red
+        Write-Host "[ERROR] No releases found for $repoOwner/$repoName." -ForegroundColor Red
         return $null
     }
     # PICK THE TOP ENTRY ONCE SORTED BY 'published_at' DESCENDING
@@ -675,7 +675,7 @@ function Install-WingetDependencies {
 
 $latestRelease = Get-LatestRelease
 if (-not $latestRelease) { 
-    Write-Host "ERROR: Could not retrieve the latest release. Skipping WinGet installation." -ForegroundColor Red
+    Write-Host "[ERROR] Could not retrieve the latest release. Skipping WinGet installation." -ForegroundColor Red
     return
 }
 
@@ -687,7 +687,7 @@ Write-Host "`nDownloading WinGet package..." -ForegroundColor Cyan
 $msixName = "Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
 $msixUrl = Get-AssetUrl -release $latestRelease -assetName $msixName
 if (-not $msixUrl) { 
-    Write-Host "ERROR: Could not find $msixName in the latest release assets." -ForegroundColor Red
+    Write-Host "[ERROR] Could not find $msixName in the latest release assets." -ForegroundColor Red
     return
 }
 
@@ -737,7 +737,7 @@ if ($removeMsStoreAsSource) {
         winget source remove -n msstore --ignore-warnings
         Write-Host "  -> Removed 'msstore' source from winget." -ForegroundColor Green
     } catch {
-        Write-Host "  -> WARNING: An error occurred while trying to remove msstore source: $($_.Exception.Message)" -ForegroundColor Yellow
+        Write-Host "  -> [WARNING] An error occurred while trying to remove msstore source: $($_.Exception.Message)" -ForegroundColor Yellow
     }
 } else {
     # AUTOMATICALLY ACCEPT SOURCE AGREEMENTS TO AVOID PROMPTS - MOSTLY APPLIES TO MSSTORE
@@ -765,7 +765,7 @@ try {
     Start-Process explorer
     Write-Host "  -> Explorer restarted successfully." -ForegroundColor Green
 } catch {
-    Write-Host "  -> WARNING: Could not restart Explorer. $($_.Exception.Message)" -ForegroundColor Yellow
+    Write-Host "  -> [WARNING] Could not restart Explorer. $($_.Exception.Message)" -ForegroundColor Yellow
 }
 
 Write-Host "`n============================================================" -ForegroundColor Green
