@@ -12,7 +12,7 @@ param(
 # WE'LL DO A RUDAMENTARY CHECK FOR IF THE CURRENT USER IS NAMED 'WDAGUtilityAccount'
 if ($env:USERNAME -ne "WDAGUtilityAccount") {
     Write-Host "`n`n[ERROR] This script is intended to be run from WITHIN the Windows Sandbox.`nIt appears you are running this from outside the sandbox.`n" -ForegroundColor Red
-    Write-Host "`nPress Enter to exit." -ForegroundColor Yellow
+    Write-Host "`nPress Enter to exit.`n`n" -ForegroundColor Yellow
     Read-Host
     exit
 }
@@ -20,7 +20,7 @@ if ($env:USERNAME -ne "WDAGUtilityAccount") {
 # CHECK FOR ADMINISTRATOR PRIVILEGES - REQUIRED FOR INSTALLATION STEPS
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-Host "`n`n[ERROR] This script requires Administrator privileges.`nPlease re-run the script as Administrator.`n" -ForegroundColor Red
-    Write-Host "`nPress Enter to exit." -ForegroundColor Yellow
+    Write-Host "`nPress Enter to exit.`n`n" -ForegroundColor Yellow
     Read-Host
     exit
 }
@@ -28,9 +28,9 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 
 ############################################################ GENERAL TWEAKS ############################################################
 
-Write-Host "`n============================================================" -ForegroundColor Cyan
-Write-Host "Applying General Tweaks" -ForegroundColor Cyan
-Write-Host "============================================================" -ForegroundColor Cyan
+Write-Host "`n`n============================================================" -ForegroundColor Blue
+Write-Host "Applying General Tweaks" -ForegroundColor Blue
+Write-Host "============================================================" -ForegroundColor Blue
 
 # FIX FOR SLOW MSI PACKAGE INSTALL - SEE: https://github.com/microsoft/Windows-Sandbox/issues/68#issuecomment-2754867968
 Write-Host "`nApplying MSI package install performance fix..." -ForegroundColor Cyan
@@ -61,12 +61,14 @@ Write-Host "`nDetected system architecture: $systemArch" -ForegroundColor Green
 $originalProgressPreference = $ProgressPreference
 $ProgressPreference = 'SilentlyContinue'
 
+Write-Host "`nGeneral tweaks applied successfully!" -ForegroundColor Blue
+
 
 ############################################################ DARK DESIGN ############################################################
 
-Write-Host "`n============================================================" -ForegroundColor Cyan
-Write-Host "Configuring Dark Theme" -ForegroundColor Cyan
-Write-Host "============================================================" -ForegroundColor Cyan
+Write-Host "`n`n============================================================" -ForegroundColor Blue
+Write-Host "Configuring Dark Theme" -ForegroundColor Blue
+Write-Host "============================================================" -ForegroundColor Blue
 
 Write-Host "`nApplying dark theme settings..." -ForegroundColor Cyan
 
@@ -92,12 +94,14 @@ $SEND_CHANGE = 0x02
 
 Write-Host "  -> Dark theme applied successfully!" -ForegroundColor Green
 
+Write-Host "`nDark theme configuration completed successfully!" -ForegroundColor Blue
+
 
 ############################################################ EXPLORER ############################################################
 
-Write-Host "`n============================================================" -ForegroundColor Cyan
-Write-Host "Configuring Windows Explorer" -ForegroundColor Cyan
-Write-Host "============================================================" -ForegroundColor Cyan
+Write-Host "`n`n============================================================" -ForegroundColor Blue
+Write-Host "Configuring Windows Explorer" -ForegroundColor Blue
+Write-Host "============================================================" -ForegroundColor Blue
 
 Write-Host "`nConfiguring Explorer settings..." -ForegroundColor Cyan
 
@@ -145,14 +149,14 @@ reg --% add "HKEY_CLASSES_ROOT\.ps1\ShellNew" /v "NullFile" /t REG_SZ /d "" /f
 reg add "HKEY_CLASSES_ROOT\.ps1\ShellNew" /v "ItemName" /t REG_SZ /d "script" /f | Out-Null
 Write-Host "  -> Added 'New PowerShell Script' to context menu." -ForegroundColor Green
 
-Write-Host "`nExplorer configuration completed successfully!" -ForegroundColor Green
+Write-Host "`nExplorer configuration completed successfully!" -ForegroundColor Blue
 
 
 ############################################################ INSTALL MSStore ############################################################
 
-Write-Host "`n============================================================" -ForegroundColor Cyan
-Write-Host "Starting Microsoft Store Installation" -ForegroundColor Cyan
-Write-Host "============================================================" -ForegroundColor Cyan
+Write-Host "`n`n============================================================" -ForegroundColor Blue
+Write-Host "Starting Microsoft Store Installation" -ForegroundColor Blue
+Write-Host "============================================================" -ForegroundColor Blue
 
 ######################### Configuration #########################
 $flightRing = "Retail"         # APPARENTLY ACCEPTS 'Retail', 'Internal', AND 'External'
@@ -177,7 +181,7 @@ if (-not (Test-Path -Path $workingDir)) {
 
 if ($debugSaveFiles) {
     # CREATE A SUBDIRECTORY FOR LOGS IF IT DOESN'T EXIST
-    if (-not (Test-Path -Path $LogDirectory)) New-Item -Path $LogDirectory -ItemType Directory -Force | Out-Null
+    if (-not (Test-Path -Path $LogDirectory)) { New-Item -Path $LogDirectory -ItemType Directory -Force | Out-Null }
     Write-Host "All files (logs, downloads) will be saved to: '$LogDirectory'" -ForegroundColor Yellow
 }
 
@@ -571,6 +575,8 @@ try {
         Write-Host "     [ERROR] Failed to configure registry settings. $($_.Exception.Message)" -ForegroundColor Red
     }
 
+    Write-Host "`nMicrosoft Store installation completed successfully!" -ForegroundColor Blue
+
 } catch {
     Write-Host "`n[ERROR] An error occurred during Microsoft Store installation:" -ForegroundColor Red
     if ($_.Exception.Response) {
@@ -598,9 +604,9 @@ try {
 
 ############################################################ INSTALL WinGet ############################################################
 
-Write-Host "`n============================================================" -ForegroundColor Cyan
-Write-Host "Starting WinGet Installation" -ForegroundColor Cyan
-Write-Host "============================================================" -ForegroundColor Cyan
+Write-Host "`n`n============================================================" -ForegroundColor Blue
+Write-Host "Starting WinGet Installation" -ForegroundColor Blue
+Write-Host "============================================================" -ForegroundColor Blue
 
 # DEFINE SHARED DOWNLOAD PATH
 $downloadPath = (New-Object -ComObject Shell.Application).Namespace('shell:Downloads').Self.Path
@@ -635,7 +641,7 @@ function Get-AssetUrl {
     )
     if ($release.assets -and $release.assets.Count -gt 0) {
         $asset = $release.assets | Where-Object { $_.name -eq $assetName }
-        if ($asset) return $asset.browser_download_url
+        if ($asset) { return $asset.browser_download_url }
     }
     return $null
 }
@@ -745,7 +751,7 @@ if ($removeMsStoreAsSource) {
     Write-Host "  -> Accepted source agreements." -ForegroundColor Green
 }
 
-Write-Host "`nWinGet installation completed!" -ForegroundColor Green
+Write-Host "`nWinGet installation completed successfully!" -ForegroundColor Blue
 
 
 ############################################################ FINALIZATION ############################################################
@@ -753,9 +759,9 @@ Write-Host "`nWinGet installation completed!" -ForegroundColor Green
 # RESTORE PROGRESS PREFERENCE
 $ProgressPreference = $originalProgressPreference
 
-Write-Host "`n============================================================" -ForegroundColor Cyan
-Write-Host "Finalizing Setup" -ForegroundColor Cyan
-Write-Host "============================================================" -ForegroundColor Cyan
+Write-Host "`n`n============================================================" -ForegroundColor Blue
+Write-Host "Finalizing Setup" -ForegroundColor Blue
+Write-Host "============================================================" -ForegroundColor Blue
 
 # RESTART EXPLORER SO CHANGES TAKE EFFECT
 Write-Host "`nRestarting Explorer to apply changes..." -ForegroundColor Cyan
@@ -768,6 +774,6 @@ try {
     Write-Host "  -> [WARNING] Could not restart Explorer. $($_.Exception.Message)" -ForegroundColor Yellow
 }
 
-Write-Host "`n============================================================" -ForegroundColor Green
-Write-Host "Setup Complete!" -ForegroundColor Green
-Write-Host "============================================================" -ForegroundColor Green
+Write-Host "`n`n============================================================" -ForegroundColor Blue
+Write-Host "Setup Complete!" -ForegroundColor Blue
+Write-Host "============================================================`n`n" -ForegroundColor Blue
