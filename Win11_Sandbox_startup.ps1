@@ -17,6 +17,14 @@ if ($env:USERNAME -ne "WDAGUtilityAccount") {
     exit
 }
 
+# CHECK FOR ADMINISTRATOR PRIVILEGES - REQUIRED FOR INSTALLATION STEPS
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Host "`n`n[ERROR] This script requires Administrator privileges.`nPlease re-run the script as Administrator.`n" -ForegroundColor Red
+    Write-Host "`nPress Enter to exit." -ForegroundColor Yellow
+    Read-Host
+    exit
+}
+
 
 ############################################################ GENERAL TWEAKS ############################################################
 
@@ -487,15 +495,7 @@ try {
     ######################### [5] INSTALL DOWNLOADED PACKAGES #########################
     Write-Host "`n[5] Installing packages..." -ForegroundColor Magenta
 
-    # [1] CHECK FOR ADMINISTRATOR RIGHTS
-    if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-        Write-Host "`nERROR: Installation requires Administrator privileges. Please re-run the script as Administrator." -ForegroundColor Red
-        Write-Host "Press Enter to exit..." -ForegroundColor Yellow
-        Read-Host
-        exit
-    }
-
-    # [2] DEFINE THE INSTALLATION ORDER FOR DEPENDENCIES BASED ON THEIR BASE NAMES - THE ORDER HERE IS CRITICAL FOR DEPENDENCIES
+    # [1] DEFINE THE INSTALLATION ORDER FOR DEPENDENCIES BASED ON THEIR BASE NAMES - THE ORDER HERE IS CRITICAL FOR DEPENDENCIES
     $dependencyInstallOrder = @(
         'Microsoft.VCLibs',
         'Microsoft.NET.Native.Framework',
@@ -503,7 +503,7 @@ try {
         'Microsoft.UI.Xaml'
     )
 
-    # [3] GET ALL DOWNLOADED PACKAGE FILES AND SEPARATE THE MAIN APP FROM DEPENDENCIES
+    # [2] GET ALL DOWNLOADED PACKAGE FILES AND SEPARATE THE MAIN APP FROM DEPENDENCIES
     try {
         $allDownloadedFiles = Get-ChildItem -Path $workingDir -File | Where-Object { $_.Extension -in '.appx', '.msix', '.appxbundle', '.msixbundle' }
         $storePackageFile = $allDownloadedFiles | Where-Object { $_.Name -like 'Microsoft.WindowsStore*' } | Select-Object -First 1
@@ -514,7 +514,7 @@ try {
             return
         }
 
-        # [4] INSTALL DEPENDENCIES IN THE CORRECT, PREDEFINED ORDER
+        # [3] INSTALL DEPENDENCIES IN THE CORRECT, PREDEFINED ORDER
         Write-Host "  -> Installing dependencies..." -ForegroundColor Cyan
         foreach ($baseName in $dependencyInstallOrder) {
             # FIND ALL PACKAGES THAT START WITH THE CURRENT BASE NAME (e.g. 'Microsoft.VCLibs*')
@@ -531,7 +531,7 @@ try {
             }
         }
 
-        # [5] INSTALL THE MAIN MICROSOFT STORE PACKAGE LAST
+        # [4] INSTALL THE MAIN MICROSOFT STORE PACKAGE LAST
         if ($storePackageFile) {
             Write-Host "  -> Installing the main application..." -ForegroundColor Cyan
             Write-Host "     Installing $($storePackageFile.Name)" -ForegroundColor Gray
